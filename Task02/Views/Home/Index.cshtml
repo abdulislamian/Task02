@@ -1,0 +1,228 @@
+﻿@{
+    ViewData["Title"] = "Interceptor Filter";
+}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.0.1/css/bootstrap.min.css"/>
+<style>
+    .is-invalid {
+        border-color: #dc3545;
+    }
+
+    .invalid-feedback {
+        color: #dc3545; 
+    }
+</style>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+
+<input type="number" id="dataInput" placeholder="Enter Book Id" class="form-control" />
+<span class="invalid-feedback" id="error-message"></span>
+
+<br />
+<button id="btngetData" class="btn btn-primary">Get All Book</button>
+<button id="btngetBook" class="btn btn-primary">Get Book</button>
+<button id="btnDeleteBook" class="btn btn-primary">Delete Book</button>
+<br/>
+<div class="row">
+    <div class="col-6">
+        <div id="headerContainer">
+            <table id="headerTable" class="table">
+                <thead>
+                    <tr>
+                        <th>Header Name</th>
+                        <th>Header Value</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+    <div class="col-6">
+        <div class="container">
+            <h2 class="mt-3">Add Book</h2>
+            <form id="addBookForm" class="mt-3">
+                <div class="form-group">
+                    <label for="title">Title:</label>
+                    <input type="text" class="form-control" id="title" name="title" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="isbn">ISBN:</label>
+                    <input type="text" class="form-control" id="isbn" name="isbn" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="price">Price:</label>
+                    <input type="number" class="form-control" id="price" name="price" required>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Add Book</button>
+            </form>
+        </div>
+
+    </div>
+</div>
+<hr/>
+<table id="bookTable" class="table">
+    <thead>
+        <tr>
+            <th>Book ID</th>
+            <th>Title</th>
+            <th>ISBN</th>
+            <th>Price</th>
+        </tr>
+    </thead>
+    <tbody>
+        
+    </tbody>
+</table>
+<br/>
+<br/>
+<br/>
+<br/>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.0.1/js/bootstrap.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+     
+        function fetchDataFromSource(method) {
+            var methodtocall = method;
+            debugger;
+            $.ajax({
+                url: '/Home/' + methodtocall, 
+                type: 'GET', 
+                success: function (data, status, xhr) {
+                    debugger;
+
+                   ShowContextResponse(xhr);
+                    var bookTableBody = $('#bookTable tbody');
+                    bookTableBody.empty();
+
+                    data.forEach(function (book) {
+                        var newRow = '<tr><td>' + book.bookId + '</td><td>' + book.title + '</td><td>' + book.isbn + '</td><td>' + book.price + '</td></tr>';
+                        bookTableBody.append(newRow);
+                    });
+                }
+            });
+        }
+        function ShowContextResponse(xhr){
+            var tableBody = $('#headerTable tbody');
+            tableBody.empty();
+            var customHeaders = [
+                'X-Action-Name',
+                'X-HTTP-Method',
+                'X-HTTP-Scheme',
+                'X-Host',
+                'X-Port',
+                'X-Execution-Time',
+                'X-Server-DateTime'
+            ];
+
+            // Loop through the custom headers and populate the table
+            customHeaders.forEach(function (headerName) {
+                var headerValue = xhr.getResponseHeader(headerName);
+
+                if (headerValue) {
+                    var newRow = '<tr><td>' + headerName + '</td><td>' + headerValue + '</td></tr>';
+                    tableBody.append(newRow);
+                }
+            });
+        }
+
+        function checkifinputisEmpty(id) {
+
+            var errorMessageElement = $('#error-message');
+            if (id === '') {
+                errorMessageElement.text('ID cannot be empty');
+                $('#dataInput').addClass('is-invalid');
+                return;
+            }
+            errorMessageElement.text('');
+            $('#dataInput').removeClass('is-invalid');
+        }
+        $('#btngetData').click(function (e) {
+            e.preventDefault();
+            fetchDataFromSource("GetAllBooks");
+        });
+
+        $('#btngetBook').click(function (e) {
+            e.preventDefault();
+            var id = $('#dataInput').val();
+            if (id === '') {
+                checkifinputisEmpty(id);
+                return;
+            }
+            
+            fetchDataFromSource("GetBookByAuthorID?authorID=" + id);
+        });
+
+        $('#btnDeleteBook').click(function (e) {
+            e.preventDefault();
+            var id = $('#dataInput').val();
+            if (id === '') {
+                checkifinputisEmpty(id);
+                return;
+            }
+            $.ajax({
+                type: 'DELETE',
+                url: '/Home/DeleteBookByID/' + id,
+                success: function (response) {
+                    if (response.success) {
+                        alert(response.message); 
+                    } else {
+                        alert(response.message);
+                    }
+                },
+                error: function (error) {
+                    alert('An error occurred while deleting the book.');
+                }
+            });
+        });
+        $('#addBookForm').submit(function (event) {
+            event.preventDefault();
+
+            var title = $('#title').val();
+            var isbn = $('#isbn').val();
+            var price = parseFloat($('#price').val());
+
+            if (title && isbn && price) {
+                var data = {
+                    Title: title,
+                    ISBN: isbn,
+                    Price: price,
+                    AuthorId:1
+                };
+                var jsonData = JSON.stringify(data);
+                debugger;
+                $.ajax({
+                    type: 'POST',
+                    url: '/Home/SaveBook',
+                    data: JSON.stringify(data),
+                    contentType: 'application/json; charset=utf-8',
+                    success: function (response,status,xhr) {
+                        if (response.success) {
+                            var newRow = '<tr><td>' + title + '</td><td>' + isbn + '</td><td>' + price + '</td></tr>';
+                            $('#bookTable tbody').append(newRow);
+
+                            ShowContextResponse(xhr);
+
+                            $('#title').val('');
+                            $('#isbn').val('');
+                            $('#price').val('');
+                        } else {
+                            alert('Book not added. Please check the form data.');
+                        }
+                    },
+                    error: function (error) {
+                        alert('An error occurred while adding the book.');
+                    }
+                });
+            } else {
+                alert('Please fill in all fields.');
+            }
+        });
+
+    });
+</script>
+

@@ -1,6 +1,110 @@
 ﻿@{
-    ViewData["Title"] = "Privacy Policy";
+    ViewData["Title"] = "[FromForm]";
 }
 <h1>@ViewData["Title"]</h1>
 
-<p>Use this page to detail your site's privacy policy.</p>
+
+<div class="row">
+    <div class="col-6">
+        <div id="headerContainer">
+            <table id="headerTable" class="table">
+                <thead>
+                    <tr>
+                        <th>Header Name</th>
+                        <th>Header Value</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+    <div class="col-6">
+        <div class="container">
+            <h2 class="mt-3">Add Book</h2>
+            <form id="addBookForm" class="mt-3" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="title">Title:</label>
+                    <input type="text" class="form-control" id="title" name="title" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="isbn">ISBN:</label>
+                    <input type="text" class="form-control" id="isbn" name="isbn" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="price">Price:</label>
+                    <input type="number" class="form-control" id="price" name="price" required>
+                </div>
+                <br />
+                <button type="submit" class="btn btn-outline-primary">Add Book</button>
+                <a href="/Home/Index" class="btn btn-outline-dark float-end">Go Back</a>
+            </form>
+        </div>
+
+    </div>
+</div>
+
+
+<script>
+    $(document).ready(function () {
+
+        $('form#addBookForm').submit(function (event) {
+            event.preventDefault();
+
+            var formdata = new FormData(this);
+            debugger;
+            $.ajax({
+                type: 'POST',
+                url: '/Home/SaveBookFromForm',
+                data: formdata,
+                //contentType: 'multipart/form-data',
+                processData: false,
+                contentType: false,
+                success: function (response, status, xhr) {
+                    if (response.success) {
+                        var newRow = '<tr><td>' + title + '</td><td>' + isbn + '</td><td>' + price + '</td></tr>';
+                        $('#bookTable tbody').append(newRow);
+                        //window.location.href = '/Home/Index';
+                        ShowContextResponse(xhr);
+
+                        $('#title').val('');
+                        $('#isbn').val('');
+                        $('#price').val('');
+                    }
+                    else {
+                        alert('Book not added. Please check the form data.');
+                    }
+                },
+                error: function (error) {
+                    alert('An error occurred while adding the book.');
+                }
+            });
+        });
+        function ShowContextResponse(xhr) {
+            var tableBody = $('#headerTable tbody');
+            tableBody.empty();
+            var customHeaders = [
+                'Action-Name',
+                'HTTP-Method',
+                'HTTP-Scheme',
+                'Host',
+                'Port',
+                'Execution-Time',
+                'Server-DateTime'
+            ];
+
+            // Loop through the custom headers and populate the table
+            customHeaders.forEach(function (headerName) {
+                var headerValue = xhr.getResponseHeader(headerName);
+
+                if (headerValue) {
+                    var newRow = '<tr><td>' + headerName + '</td><td>' + headerValue + '</td></tr>';
+                    tableBody.append(newRow);
+                }
+            });
+        }
+
+
+    });
+</script>

@@ -22,14 +22,14 @@ namespace Task02.Middleware
                 stopwatch.Stop();
                 long elapsedMilliseconds = stopwatch.ElapsedMilliseconds;
 
-                // Append custom headers to the response.
-                httpContext.Response.Headers.Add("X-Action-Name", httpContext.Request.RouteValues["action"] as string);
-                httpContext.Response.Headers.Add("X-HTTP-Method", httpContext.Request.Method);
-                httpContext.Response.Headers.Add("X-HTTP-Scheme", httpContext.Request.Scheme);
-                httpContext.Response.Headers.Add("X-Host", httpContext.Request.Host.Host);
-                httpContext.Response.Headers.Add("X-Port", httpContext.Request.Host.Port.ToString());
-                httpContext.Response.Headers.Add("X-Execution-Time", elapsedMilliseconds.ToString());
-                httpContext.Response.Headers.Add("X-Server-DateTime", DateTime.Now.ToString());
+                
+                httpContext.Response.Headers.Add("Action-Name", httpContext.Request.RouteValues["action"] as string);
+                httpContext.Response.Headers.Add("HTTP-Method", httpContext.Request.Method);
+                httpContext.Response.Headers.Add("HTTP-Scheme", httpContext.Request.Scheme);
+                httpContext.Response.Headers.Add("Host", httpContext.Request.Host.Host);
+                httpContext.Response.Headers.Add("Port", httpContext.Request.Host.Port.ToString());
+                httpContext.Response.Headers.Add("Execution-Time", elapsedMilliseconds.ToString());
+                httpContext.Response.Headers.Add("Server-DateTime", DateTime.Now.ToString());
 
                 return Task.CompletedTask;
             }, context);

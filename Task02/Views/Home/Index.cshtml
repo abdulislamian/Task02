@@ -1,27 +1,34 @@
 ﻿@{
     ViewData["Title"] = "Interceptor Filter";
 }
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.0.1/css/bootstrap.min.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.0.1/css/bootstrap.min.css" />
 <style>
     .is-invalid {
         border-color: #dc3545;
     }
 
     .invalid-feedback {
-        color: #dc3545; 
+        color: #dc3545;
     }
 </style>
 
 
 
-<input type="number" id="dataInput" placeholder="Enter Book Id" class="form-control" />
-<span class="invalid-feedback" id="error-message"></span>
-
-<br />
-<button id="btngetData" class="btn btn-primary">Get All Book</button>
-<button id="btngetBook" class="btn btn-primary">Get Book</button>
-<button id="btnDeleteBook" class="btn btn-primary">Delete Book</button>
-<br/>
+<div class="row">
+    <div class="col-6">
+        <input type="number" id="dataInput" placeholder="Enter Book Id" class="form-control" />
+        <span class="invalid-feedback" id="error-message"></span>
+    </div>
+    <br />
+    <div class="col-6">
+        <div class="d-flex justify-content-center align-items-lg-center">
+            <button id="btngetData" class="btn btn-primary">Get All Book</button> &nbsp;|&nbsp;
+            <button id="btngetBook" class="btn btn-warning">Get Book By AuthorID</button>&nbsp;|&nbsp;
+            <button id="btnDeleteBook" class="btn btn-info">Delete Book</button>
+            <br />
+        </div>
+    </div>
+</div>
 <div class="row">
     <div class="col-6">
         <div id="headerContainer">
@@ -54,14 +61,15 @@
                     <label for="price">Price:</label>
                     <input type="number" class="form-control" id="price" name="price" required>
                 </div>
-
-                <button type="submit" class="btn btn-primary">Add Book</button>
+                <br />
+                <button type="submit" class="btn btn-secondary">Add Book</button>
+                <a href="/Home/Privacy" class="btn btn-outline-dark float-end">Submit with FromForm</a>
             </form>
         </div>
 
     </div>
 </div>
-<hr/>
+<hr />
 <table id="bookTable" class="table">
     <thead>
         <tr>
@@ -72,29 +80,28 @@
         </tr>
     </thead>
     <tbody>
-        
     </tbody>
 </table>
-<br/>
-<br/>
-<br/>
-<br/>
+<br />
+<br />
+<br />
+<br />
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.0.1/js/bootstrap.min.js"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
     $(document).ready(function () {
-     
+
         function fetchDataFromSource(method) {
             var methodtocall = method;
             debugger;
             $.ajax({
-                url: '/Home/' + methodtocall, 
-                type: 'GET', 
+                url: '/Home/' + methodtocall,
+                type: 'GET',
                 success: function (data, status, xhr) {
                     debugger;
 
-                   ShowContextResponse(xhr);
+                    ShowContextResponse(xhr);
                     var bookTableBody = $('#bookTable tbody');
                     bookTableBody.empty();
 
@@ -105,17 +112,17 @@
                 }
             });
         }
-        function ShowContextResponse(xhr){
+        function ShowContextResponse(xhr) {
             var tableBody = $('#headerTable tbody');
             tableBody.empty();
             var customHeaders = [
-                'X-Action-Name',
-                'X-HTTP-Method',
-                'X-HTTP-Scheme',
-                'X-Host',
-                'X-Port',
-                'X-Execution-Time',
-                'X-Server-DateTime'
+                'Action-Name',
+                'HTTP-Method',
+                'HTTP-Scheme',
+                'Host',
+                'Port',
+                'Execution-Time',
+                'Server-DateTime'
             ];
 
             // Loop through the custom headers and populate the table
@@ -152,7 +159,7 @@
                 checkifinputisEmpty(id);
                 return;
             }
-            
+
             fetchDataFromSource("GetBookByAuthorID?authorID=" + id);
         });
 
@@ -166,9 +173,11 @@
             $.ajax({
                 type: 'DELETE',
                 url: '/Home/DeleteBookByID/' + id,
-                success: function (response) {
+                success: function (response, status, xhr) {
                     if (response.success) {
-                        alert(response.message); 
+                        alert(response.message);
+                        ShowContextResponse(xhr);
+                        //fetchDataFromSource("GetAllBooks");
                     } else {
                         alert(response.message);
                     }
@@ -190,16 +199,15 @@
                     Title: title,
                     ISBN: isbn,
                     Price: price,
-                    AuthorId:1
+                    AuthorId: 1
                 };
-                var jsonData = JSON.stringify(data);
-                debugger;
+                //debugger;
                 $.ajax({
                     type: 'POST',
                     url: '/Home/SaveBook',
                     data: JSON.stringify(data),
                     contentType: 'application/json; charset=utf-8',
-                    success: function (response,status,xhr) {
+                    success: function (response, status, xhr) {
                         if (response.success) {
                             var newRow = '<tr><td>' + title + '</td><td>' + isbn + '</td><td>' + price + '</td></tr>';
                             $('#bookTable tbody').append(newRow);

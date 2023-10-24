@@ -30,6 +30,19 @@ namespace Task02.Controllers
                 dbContext.SaveChanges();
                 return Json(new { success = true, message = "Book added successfully" });
             }
+            var abc= Json(new { success = false, errors = ModelState.Values.SelectMany(v => v.Errors) });
+            return Json(new { success = false, errors = ModelState.Values.SelectMany(v => v.Errors) });
+        }
+        [HttpPost]
+        public IActionResult SaveBookFromForm([FromForm] Book book)
+        {
+            if(!string.IsNullOrEmpty(book.Title))
+            {
+                dbContext.Books.Add(book);
+                dbContext.SaveChanges();
+                return Json(new { success = true, message = "Book added successfully" });
+            }
+            var abc= Json(new { success = false, errors = ModelState.Values.SelectMany(v => v.Errors) });
             return Json(new { success = false, errors = ModelState.Values.SelectMany(v => v.Errors) });
         }
 
@@ -40,7 +53,7 @@ namespace Task02.Controllers
             return Json(AllBooks);
         }
         [HttpGet]
-        public IActionResult GetBookByAuthorID(int authorID)
+        public IActionResult GetBookByAuthorID([FromQuery] int authorID)
         {
             var AllBooks = dbContext.Books.Where(x=>x.AuthorId==authorID).ToList();
             return Json(AllBooks);
@@ -60,6 +73,10 @@ namespace Task02.Controllers
                 return Json(new { success = false, message = "Failed to delete the book OR No book Found with ID" });
             }
             
+        }
+        public IActionResult Privacy()
+        {
+            return View();
         }
     }
 }

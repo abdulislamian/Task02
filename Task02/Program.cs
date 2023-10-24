@@ -5,7 +5,11 @@ using Task02.Middleware;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews(options =>
+{
+    options.Filters.Add<InterceptHttpResponseMiddleware>();
+});
+
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(
     builder.Configuration.GetConnectionString("appConnection")));
 
@@ -19,7 +23,8 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-app.UseMiddleware<InterceptorFilterMiddleware>();
+//app.UseMiddleware<InterceptorFilterMiddleware>();
+
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
